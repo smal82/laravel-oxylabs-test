@@ -85,7 +85,6 @@ Funzionalità disponibili:
 |----------------------|----------------------------------------|
 | 👤 Sviluppatore       | [@smal82](https://github.com/smal82)   |
 | 📅 Data progetto      | Luglio 2025                            |
-| 📜 Licenza            | MIT                                    |
 | 🔧 Stack tecnologico  | Laravel, Filament, Livewire, AlpineJS, TailwindCSS |
 ---
 
