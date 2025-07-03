@@ -50,7 +50,6 @@ php artisan storage:link
 npm run dev   # oppure npm run build per produzione
 php artisan serve
 ```
-
 ## 🧱 Struttura del database
 
 La struttura del database è inclusa in:
@@ -67,6 +66,29 @@ Poi esegui:
 mysql -u root -p laravel_database < database/sql/laravel_database.sql
 ```
 
+## 🔗 Endpoint principali
+
+### ⚙️ API Importazione
+
+`POST /api/import`  
+Riceve un JSON dal crawler ed esegue l'importazione asincrona tramite Job Laravel.
+
+### 🌍 Frontend pubblico
+
+`GET /view/products`  
+Mostra i prodotti con:
+
+- paginazione (minimo 25 per pagina)
+- ordinamento (titolo, prezzo, data)
+- layout responsive con Tailwind
+- Livewire + AlpineJS per reattività senza reload
+
+## 🗂️ Admin Panel – Filament
+
+Accesso via:  
+`/admin/products`
+
+=======
 ## 🔗 Endpoint principali
 
 ### ⚙️ API Importazione
