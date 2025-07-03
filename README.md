@@ -58,7 +58,7 @@ La struttura del database è inclusa in:
 
 ### 🔁 Importazione SQL
 
-Assicurati che il database esista e corrisponda al nome indicato in `.env` (es: `DB_DATABASE=laravel_oxylabs`)
+Assicurati che il database esista e corrisponda al nome indicato in `.env` (es: `DB_DATABASE=laravel_database`)
 
 Poi esegui:
 
