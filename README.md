@@ -56,16 +56,6 @@ La struttura del database è inclusa in:
 
 `database/sql/laravel_database.sql`
 
-### 🔁 Importazione SQL
-
-Assicurati che il database esista e corrisponda al nome indicato in `.env` (es: `DB_DATABASE=laravel_database`)
-
-Poi esegui:
-
-```bash
-mysql -u root -p laravel_database < database/sql/laravel_database.sql
-```
-
 ## 🔗 Endpoint principali
 
 ### ⚙️ API Importazione
