@@ -110,6 +110,8 @@ Mostra i prodotti con:
 Accesso via:  
 `/admin/products`
 
+Il file `products.json` viene generato automaticamente.  
+
 Funzionalità disponibili:
 
 - visualizzazione prodotti
