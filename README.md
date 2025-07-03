@@ -50,12 +50,6 @@ php artisan storage:link
 npm run dev   # oppure npm run build per produzione
 php artisan serve
 ```
-## 🧱 Struttura del database
-
-La struttura del database è inclusa in:
-
-`database/sql/laravel_database.sql`
-
 ## 🔗 Endpoint principali
 
 ### ⚙️ API Importazione
