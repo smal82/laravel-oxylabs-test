@@ -88,7 +88,6 @@ Mostra i prodotti con:
 Accesso via:  
 `/admin/products`
 
-=======
 ## 🔗 Endpoint principali
 
 ### ⚙️ API Importazione
