@@ -36,7 +36,7 @@ I seguenti requisiti non devono essere presenti sul sistema, in quanto nella rep
 
 ### 📦 Setup rapido
 
-
+Per scaricare il file setup.sh, apritelo e in alto a destra trovate i ... e cliccandoci trovate il link di Download.
 
 ## 🔗 Endpoint principali
 
