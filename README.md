@@ -18,6 +18,12 @@ Questo progetto è una prova tecnica sviluppata in **Laravel 10+**, con focus su
 - Gestire i dati tramite **Filament Admin**
 - Visualizzare i prodotti pubblicamente con frontend dinamico
 
+## Funzionalità disponibili:
+
+- visualizzazione prodotti
+- modifica ed eliminazione
+- sorting e ricerca
+
 ## ⚙️ Installazione da zero ( Linux)
 
 ### ✅ Requisiti
@@ -60,59 +66,6 @@ A questo punto vengono avviati: i servizi di Laravel, il Server di Laravel, il w
 
 Se è andato tutto a buon fine il sito è possibile visitarlo dal link: http://127.0.0.1:8000/view/products
 Mentre il login nel pannello di amministrazione è: http://127.0.0.1:8000/admin/login
-
-## 🔗 Endpoint principali
-
-### ⚙️ API Importazione
-
-`POST /api/import`  
-Riceve un JSON dal crawler ed esegue l'importazione asincrona tramite Job Laravel.
-
-### 🌍 Frontend pubblico
-
-`GET /view/products`  
-Mostra i prodotti con:
-
-- paginazione (minimo 25 per pagina)
-- ordinamento (titolo, prezzo, data)
-- layout responsive con Tailwind
-- Livewire + AlpineJS per reattività senza reload
-
-## 🗂️ Admin Panel – Filament
-
-Accesso via:  
-`/admin/products`
-
-## 🔗 Endpoint principali
-
-### ⚙️ API Importazione
-
-`POST /api/import`  
-Riceve un JSON dal crawler ed esegue l'importazione asincrona tramite Job Laravel.
-
-### 🌍 Frontend pubblico
-
-`GET /view/products`  
-Mostra i prodotti con:
-
-- paginazione (minimo 25 per pagina)
-- ordinamento (titolo, prezzo, data)
-- layout responsive con Tailwind
-- Livewire + AlpineJS per reattività senza reload
-
-## 🗂️ Admin Panel – Filament
-
-Accesso via:  
-`/admin/products`
-
-Il file `products.json` viene generato automaticamente.  
-
-Funzionalità disponibili:
-
-- visualizzazione prodotti
-- modifica ed eliminazione
-- sorting e ricerca
-- (upload immagine rimosso su richiesta)
 
 ## 👨‍💻 Autore e info utili
 
