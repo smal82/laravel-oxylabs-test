@@ -34,9 +34,32 @@ I seguenti requisiti non devono essere presenti sul sistema, in quanto nella rep
 | MySQL / SQLite | Qualsiasi compatibile |
 | Laravel CLI  | (opzionale)          |
 
-### 📦 Setup rapido
+### 📦 Setup automatizzato
 
 Per scaricare il file setup.sh, apritelo e in alto a destra trovate i ... e cliccandoci trovate il link di Download.
+
+Dopo averlo scaricato da terminale vi basta dare i seguenti comandi:
+```BASH
+chmod +x setup.sh
+.\setup.sh
+```
+All'interno del terminale vi chiederà la password del vostro utente e avvierà l'intallazione di tutto:
+- Per prima cosa aggiorna il sistema, poi installa:
+- PHP + estensioni, Composer, GIT, Node.js + NPM, MySQL Server (per MySQL viene settata la password generica "123456" per l'utente root).
+
+A questo punto viene clonata questa repo e inizia la configurazione di tutto il sistema:
+- Viene creato il db laravel_database;
+- Vengono installati Laravel e le sue dipendeze;
+- Viene configurato il file .env con i parametri di connessione al DB e viene eseguita la migrazione e storage link;
+- Viene installato Filament e configurato; a tal proposito viene chiesto l'id, che di defualt è admin, ed io consiglio di lasciare admin;
+- Viene creato l'utente con il quale effettuare il login nel pannello di controllo;
+- Viene installa DomCrawler Symfony utile per effettuare il crawling del sito https://sandbox.oxylabs.io/products e memorizzare i prodotti nel nostro DB;
+- Viene settato un cron per poter tenere aggiornato il db con i prodotti del sito.
+
+A questo punto vengono avviati: i servizi di Laravel, il Server di Laravel, il worker Laravel per un job async ed il setup è completo.
+
+Se è andato tutto a buon fine il sito è possibile visitarlo dal link: http://127.0.0.1:8000/view/products
+Mentre il login nel pannello di amministrazione è: http://127.0.0.1:8000/admin/login
 
 ## 🔗 Endpoint principali
 
