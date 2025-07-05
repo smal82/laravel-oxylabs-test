@@ -9,11 +9,11 @@ sudo sysctl -p
 
 echo "🧰 [1] Aggiornamento pacchetti..."
 echo -ne "\033]0;🧰 [1] Aggiornamento pacchetti...\007"
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade
 
 echo "🐘 [2] Installazione PHP + estensioni..."
 echo -ne "\033]0;🐘 [2] Installazione PHP + estensioni...\007"
-sudo apt install -y php php-cli php-mbstring php-xml php-bcmath php-curl php-zip php-mysql php-intl php-dom unzip curl
+sudo apt install php php-cli php-mbstring php-xml php-bcmath php-curl php-zip php-mysql php-intl php-dom unzip curl
 
 echo "📦 [3] Installazione Composer..."
 echo -ne "\033]0;📦 [3] Installazione Composer...\007"
@@ -36,12 +36,17 @@ fi
 
 echo "🗄️ [6] Installazione MySQL Server..."
 echo -ne "\033]0;🗄️ [6] Installazione MySQL Server...\007"
-sudo apt install -y mysql-server
+if sudo apt install -y default-mysql-server; then
+            echo "✅ default-mysql-server installato con successo."
+ else
+            echo "🔴 Impossibile installare né mariadb-server né default-mysql-server. Installazione del database fallita."
+            exit 1 # Esce dallo script se l'installazione del database fallisce
+fi
 
 echo "🔑 [7] Configuro MySQL root con password 123456..."
 echo -ne "\033]0;🔑 [7] Configuro MySQL root con password 123456...\007"
 sudo mysql <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '123456';
 FLUSH PRIVILEGES;
 EOF
 
