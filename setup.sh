@@ -9,11 +9,11 @@ sudo sysctl -p
 
 echo "🧰 [1] Aggiornamento pacchetti..."
 echo -ne "\033]0;🧰 [1] Aggiornamento pacchetti...\007"
-sudo apt update && sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 
 echo "🐘 [2] Installazione PHP + estensioni..."
 echo -ne "\033]0;🐘 [2] Installazione PHP + estensioni...\007"
-sudo apt install php php-cli php-mbstring php-xml php-bcmath php-curl php-zip php-mysql php-intl php-dom unzip curl
+sudo apt install -y php php-cli php-mbstring php-xml php-bcmath php-curl php-zip php-mysql php-intl php-dom unzip curl
 
 echo "📦 [3] Installazione Composer..."
 echo -ne "\033]0;📦 [3] Installazione Composer...\007"
