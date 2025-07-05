@@ -107,7 +107,7 @@ fi
 echo "✏️ Correggo configurazione MySQL in .env..."
 echo -ne "\033]0;✏️ Correggo configurazione MySQL in .env...\007"
 sed -i '/DB_CONNECTION=/c\DB_CONNECTION=mysql' .env
-sed -i '/DB_HOST=/c\DB_HOST=127.0.0.1' .env
+sed -i '/DB_HOST=/c\DB_HOST=localhost' .env
 sed -i '/DB_PORT=/c\DB_PORT=3306' .env
 sed -i '/DB_DATABASE=/c\DB_DATABASE=laravel_database' .env
 sed -i '/DB_USERNAME=/c\DB_USERNAME=root' .env
