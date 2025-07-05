@@ -44,10 +44,14 @@ I seguenti requisiti non devono essere presenti sul sistema, in quanto nella rep
 
 Per scaricare il file setup.sh, apritelo e in alto a destra trovate i ... e cliccandoci trovate il link di Download.
 
-Dopo averlo scaricato da terminale vi basta dare i seguenti comandi:
+Dopo averlo scaricato da terminale recatevi nella cartella in cui avete scaricato il file e vi basta dare i seguenti comandi:
 ```BASH
 chmod +x setup.sh
 .\setup.sh
+```
+oppure se non funziona e da errori con
+```BASH
+bash setup.sh
 ```
 All'interno del terminale vi chiederà la password del vostro utente e avvierà l'intallazione di tutto:
 - Per prima cosa aggiorna il sistema, poi installa:
