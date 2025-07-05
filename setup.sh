@@ -58,6 +58,7 @@ echo "📁 [9] Clonazione progetto Laravel nella posizione corretta..."
 echo -ne "\003]0;📁 [9] Clonazione progetto Laravel...\007"
 sudo git clone https://github.com/smal82/laravel-oxylabs-test.git /var/www/html/laravel-oxylabs-test
 cd /var/www/html/laravel-oxylabs-test
+sudo rm -f /var/www/html/setup.sh
 
 echo "🔐 [10] Imposto permessi su cartella progetto..."
 echo -ne "\033]0;🔐 [10] Imposto permessi su cartella progetto...\007"
