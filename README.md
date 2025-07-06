@@ -28,7 +28,7 @@ Questo progetto è una prova tecnica sviluppata in **Laravel 10+**, con focus su
 
 ### ✅ Requisiti
 
-I seguenti requisiti non devono essere presenti sul sistema, in quanto nella repository è presente il file setup.sh per Linux della famiglia di Debian, che installa tutto,
+I seguenti requisiti non devono obbligatorialmente essere presenti sul sistema, in quanto nella repository è presente il file setup.sh per Linux della famiglia di Debian, che installa tutto, in alternativa se nel sistema son già presenti è possibile utilizzare il file setup2.sh che procede solo alla configurazione del sistema per far funzionare il mio progetto.
 
 | Tool         | Versione consigliata |
 |--------------|----------------------|
@@ -41,6 +41,8 @@ I seguenti requisiti non devono essere presenti sul sistema, in quanto nella rep
 | Laravel CLI  | (opzionale)          |
 
 ### 📦 Setup automatizzato
+
+#### setup.sh
 
 Per scaricare il file setup.sh, apritelo e in alto a destra trovate i ... e cliccandoci trovate il link di Download.
 
@@ -62,6 +64,37 @@ A questo punto viene clonata questa repo e inizia la configurazione di tutto il 
 - Vengono installati Laravel e le sue dipendeze;
 - Viene configurato il file .env con i parametri di connessione al DB e viene eseguita la migrazione e storage link;
 - Viene installato Filament e configurato; a tal proposito viene chiesto l'id, che di defualt è admin, ed io consiglio di lasciare admin;
+- Viene creato l'utente con il quale effettuare il login nel pannello di controllo;
+- Viene installa DomCrawler Symfony utile per effettuare il crawling del sito https://sandbox.oxylabs.io/products e memorizzare i prodotti nel nostro DB;
+- Viene settato un cron per poter tenere aggiornato il db con i prodotti del sito.
+
+A questo punto vengono avviati: i servizi di Laravel, il Server di Laravel, il worker Laravel per un job async ed il setup è completo.
+
+Se è andato tutto a buon fine il sito è possibile visitarlo dal link: http://127.0.0.1:8000/view/products
+Mentre il login nel pannello di amministrazione è: http://127.0.0.1:8000/admin/login
+
+#### setup2.sh
+
+Per scaricare il file setup2.sh, apritelo e in alto a destra trovate i ... e cliccandoci trovate il link di Download.
+
+Dopo averlo scaricato da terminale recatevi nella cartella in cui avete scaricato il file e vi basta dare i seguenti comandi:
+```BASH
+chmod +x setup2.sh
+.\setup2.sh
+```
+oppure se non funziona e da errori con
+```BASH
+bash setup2.sh
+```
+All'interno del terminale vi chiederà la password del vostro utente e avvierà la configurazione:
+- Per prima cosa aggiorna il sistema;
+- Poi installa sia Git che Node.js + NPM per sicurezza;
+- Configura il server Mysql con il database e l'utente personali al progetto;
+- Clona questa repositori, setta i permessi;
+- Installa il composer e le dipendenze Laravel nella cartella clonata della repo;
+- Configura il file .env per far connettere il progetto al db con l'utente personale;
+- Effettua le mie migrazioni;
+- Installa Filament e viene configurato; a tal proposito viene chiesto l'id, che di defualt è admin, ed io consiglio di lasciare admin;
 - Viene creato l'utente con il quale effettuare il login nel pannello di controllo;
 - Viene installa DomCrawler Symfony utile per effettuare il crawling del sito https://sandbox.oxylabs.io/products e memorizzare i prodotti nel nostro DB;
 - Viene settato un cron per poter tenere aggiornato il db con i prodotti del sito.
