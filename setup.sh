@@ -38,8 +38,8 @@ echo "🗄️ [6] Installazione MySQL Server..."
 echo -ne "\033]0;🗄️ [6] Installazione MySQL Server...\007"
 sudo apt install -y mysql-server
 
-echo "🔑 [4] Configuro MySQL con utente e database per Laravel (gestione esistenza utente)..."
-echo -ne "\033]0;🔑 [4] Configuro MySQL con utente e database per Laravel...\007"
+echo "🔑 [7] Configuro MySQL con utente e database per Laravel (gestione esistenza utente)..."
+echo -ne "\033]0;🔑 [7] Configuro MySQL con utente e database per Laravel...\007"
 
 sudo mysql <<EOF
 # Crea il database se non esiste già
