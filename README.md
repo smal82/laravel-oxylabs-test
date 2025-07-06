@@ -37,7 +37,7 @@ I seguenti requisiti non devono obbligatorialmente essere presenti sul sistema, 
 | Node.js      | ≥ 18.x               |
 | NPM          | ≥ 9.x                |
 | Git          | Per clonare la repo |
-| MySQL / SQLite | Qualsiasi compatibile |
+| MySQL  | Qualsiasi compatibile |
 | Laravel CLI  | (opzionale)          |
 
 ### 📦 Setup automatizzato
