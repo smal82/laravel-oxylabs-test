@@ -42,6 +42,20 @@ I seguenti requisiti non devono obbligatorialmente essere presenti sul sistema, 
 
 ### 📦 Setup automatizzato
 
+Se dovessero comparire messaggi tipo
+```BASH
+riga 2: $'\r': comando non trovato
+...
+E: Impossibile trovare il pacchetto curl
+...
+php\r': comando non trovato
+```
+Allora potete risolvere con:
+```BASH
+sudo apt install dos2unix
+dos2unix ~/setup.sh
+```
+
 #### setup.sh
 
 Per scaricare il file setup.sh, apritelo e in alto a destra trovate i ... e cliccandoci trovate il link di Download.
