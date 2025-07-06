@@ -71,7 +71,7 @@ bash setup.sh
 ```
 All'interno del terminale vi chiederà la password del vostro utente e avvierà l'intallazione di tutto:
 - Per prima cosa aggiorna il sistema, poi installa:
-- PHP + estensioni, Composer, GIT, Node.js + NPM, MySQL Server (per MySQL viene settata la password generica "123456" per l'utente root).
+- PHP + estensioni, Composer, GIT, Node.js + NPM, MySQL Server (per MySQL vengono settati un db ed un utente personali per il progetto).
 
 A questo punto viene clonata questa repo e inizia la configurazione di tutto il sistema:
 - Viene creato il db laravel_database;
