@@ -36,12 +36,7 @@ fi
 
 echo "🗄️ [6] Installazione MySQL Server..."
 echo -ne "\033]0;🗄️ [6] Installazione MySQL Server...\007"
-if sudo apt install -y default-mysql-server; then
-            echo "✅ default-mysql-server installato con successo."
- else
-            echo "🔴 Impossibile installare né mariadb-server né default-mysql-server. Installazione del database fallita."
-            exit 1 # Esce dallo script se l'installazione del database fallisce
-fi
+sudo apt install -y mysql-server
 
 echo "🔑 [7] Configuro MySQL root con password 123456..."
 echo -ne "\033]0;🔑 [7] Configuro MySQL root con password 123456...\007"
