@@ -74,7 +74,6 @@ All'interno del terminale vi chiederà la password del vostro utente e avvierà 
 - PHP + estensioni, Composer, GIT, Node.js + NPM, MySQL Server (per MySQL vengono settati un db ed un utente personali per il progetto).
 
 A questo punto viene clonata questa repo e inizia la configurazione di tutto il sistema:
-- Viene creato il db laravel_database;
 - Vengono installati Laravel e le sue dipendeze;
 - Viene configurato il file .env con i parametri di connessione al DB e viene eseguita la migrazione e storage link;
 - Viene installato Filament e configurato; a tal proposito viene chiesto l'id, che di defualt è admin, ed io consiglio di lasciare admin;
@@ -104,7 +103,7 @@ All'interno del terminale vi chiederà la password del vostro utente e avvierà 
 - Per prima cosa aggiorna il sistema;
 - Poi installa sia Git che Node.js + NPM per sicurezza;
 - Configura il server Mysql con il database e l'utente personali al progetto;
-- Clona questa repositori, setta i permessi;
+- Clona questa repository, setta i permessi;
 - Installa il composer e le dipendenze Laravel nella cartella clonata della repo;
 - Configura il file .env per far connettere il progetto al db con l'utente personale;
 - Effettua le mie migrazioni;
@@ -129,7 +128,7 @@ Mentre il login nel pannello di amministrazione è: http://127.0.0.1:8000/admin/
 
 ## 🚧 Stato del progetto
 
-🧪 In fase di verifica finale e ottimizzazione per deploy
+🧪 Pronto
 
 ## 📬 Contatti
 
