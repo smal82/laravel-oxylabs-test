@@ -38,12 +38,25 @@ echo "🗄️ [6] Installazione MySQL Server..."
 echo -ne "\033]0;🗄️ [6] Installazione MySQL Server...\007"
 sudo apt install -y mysql-server
 
-echo "🔑 [7] Configuro MySQL root con password 123456..."
-echo -ne "\033]0;🔑 [7] Configuro MySQL root con password 123456...\007"
+echo "🔑 [4] Configuro MySQL con utente e database per Laravel (gestione esistenza utente)..."
+echo -ne "\033]0;🔑 [4] Configuro MySQL con utente e database per Laravel...\007"
+
 sudo mysql <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED BY '123456';
+# Crea il database se non esiste già
+CREATE DATABASE IF NOT EXISTS laravel_oxylabs_test_database DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# Crea il nuovo utente
+CREATE USER 'laravel_oxylabs_test_user'@'localhost' IDENTIFIED BY 'kA[Q+LgF-~1C';
+
+# Concedi i privilegi al nuovo utente sul database
+GRANT ALL PRIVILEGES ON laravel_oxylabs_test_database.* TO 'laravel_oxylabs_test_user'@'localhost';
+
+# Applica i cambiamenti dei privilegi
 FLUSH PRIVILEGES;
 EOF
+
+echo "Utente 'laravel_oxylabs_test_user' e database 'laravel_oxylabs_test_database' creati e configurati con successo!"
+
 
 echo "🧼 [8] Rimuovo index.html Apache..."
 echo -ne "\033]0;🧼 [8] Rimuovo index.html Apache...\007"
@@ -99,14 +112,14 @@ else
     echo "✅ File .env già presente — salto creazione."
 fi
 
-echo "✏️ Correggo configurazione MySQL in .env..."
-echo -ne "\033]0;✏️ Correggo configurazione MySQL in .env...\007"
+echo "✏️ [13] Correggo configurazione MySQL in .env..."
+echo -ne "\033]0;✏️ [13] Correggo configurazione MySQL in .env...\007"
 sed -i '/DB_CONNECTION=/c\DB_CONNECTION=mysql' .env
 sed -i '/DB_HOST=/c\DB_HOST=127.0.0.1' .env
 sed -i '/DB_PORT=/c\DB_PORT=3306' .env
-sed -i '/DB_DATABASE=/c\DB_DATABASE=laravel_database' .env
-sed -i '/DB_USERNAME=/c\DB_USERNAME=root' .env
-sed -i '/DB_PASSWORD=/c\DB_PASSWORD=123456' .env
+sed -i '/DB_DATABASE=/c\DB_DATABASE=laravel_oxylabs_test_database' .env
+sed -i '/DB_USERNAME=/c\DB_USERNAME=laravel_oxylabs_test_user' .env # USIAMO L'UTENTE CREATO
+sed -i '/DB_PASSWORD=/c\DB_PASSWORD=kA[Q+LgF-~1C' .env     # CON LA SUA PASSWORD
 
 echo "📦 Eseguo migrazione e storage link..."
 echo -ne "\033]0;📦 Eseguo migrazione e storage link...\007"
