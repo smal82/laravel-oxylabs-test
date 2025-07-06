@@ -73,12 +73,6 @@ echo -ne "\033]0;🔐 [10] Imposto permessi su cartella progetto...\007"
 sudo chown -R www-data:www-data .
 sudo chmod -R 755 .
 
-echo "🛠️ [11] Creo database laravel_database..."
-echo -ne "\033]0;🛠️ [11] Creo database laravel_database...\007"
-sudo mysql -u root -p123456 <<EOF
-CREATE DATABASE IF NOT EXISTS laravel_database DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-EOF
-
 echo "👤 Rilevo utente corrente..."
 echo -ne "\033]0;👤 Rilevo utente corrente...\007"
 CURRENT_USER=$(whoami)
