@@ -13,11 +13,27 @@ if [[ "$DISTRO" =~ ^(ubuntu|debian|linuxmint)$ ]]; then
     UPDATE_CMD="sudo apt update && sudo apt upgrade -y"
     INSTALL_CMD="sudo apt install -y"
     WEBSERVER_GROUP="www-data"
-elif [[ "$DISTRO" =~ ^(fedora|rhel|centos|aurora)$ ]]; then
+elif [[ "$DISTRO" =~ ^(fedora|rhel|centos)$ ]]; then
     PM="dnf"
     UPDATE_CMD="sudo dnf upgrade --refresh -y"
     INSTALL_CMD="sudo dnf install -y"
     WEBSERVER_GROUP="apache"
+elif [[ "$DISTRO" =~ ^(aurora)$ ]]; then
+    PM="rpm-ostree" # Aurora usa rpm-ostree per la gestione delle immagini
+    
+    # Su Aurora, l'aggiornamento del sistema operativo si fa con ujust update
+    # Questo comando aggiorna l'immagine di base del sistema.
+    UPDATE_CMD="ujust update" 
+    
+    # L'installazione di software su Aurora è diversa:
+    # - Per le applicazioni grafiche si preferisce Flatpak.
+    # - Per gli strumenti da riga di comando si usa spesso Homebrew (brew) o distrobox/toolbox.
+    # - Si possono anche installare pacchetti rpm direttamente sull'immagine ( layering ), ma non è l'approccio raccomandato per tutto.
+    # Quindi, la logica di INSTALL_CMD dipende da cosa vuoi installare.
+    # Qui userò un placeholder, dovrai adattarlo in base al tipo di software.
+    INSTALL_CMD="# Vedi note sotto: l'installazione su Aurora dipende dal tipo di software (Flatpak, Homebrew, ecc.)"
+    
+    WEBSERVER_GROUP="apache" # Generalmente è apache anche su Fedora/Aurora per i servizi web
 else
     echo "🚫 Distribuzione non supportata: $DISTRO"
     exit 1
