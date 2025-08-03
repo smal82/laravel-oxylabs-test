@@ -20,12 +20,12 @@ if [[ "$DISTRO" =~ ^(ubuntu|debian|linuxmint)$ ]]; then
     UPDATE_CMD="sudo apt update && sudo apt upgrade -y"
     INSTALL_CMD="sudo apt install -y"
     WEBSERVER_GROUP="www-data"
-elif [[ "$DISTRO" =~ ^(fedora|rhel|centos|ultramarine)$ ]]; then
+elif [[ "$DISTRO" =~ ^(fedora|centos|almalinux)$ ]]; then
     PM="dnf"
     UPDATE_CMD="sudo dnf upgrade --refresh -y"
     INSTALL_CMD="sudo dnf install -y"
     WEBSERVER_GROUP="apache"
-elif [[ "$DISTRO" =~ ^(arch|cachyos|manjaro|endeavouros)$ ]]; then
+elif [[ "$DISTRO" =~ ^(arch|manjaro)$ ]]; then
     PM="pacman"
     UPDATE_CMD="sudo pacman -Syu --noconfirm" # Sincronizza e aggiorna i pacchetti
     INSTALL_CMD="sudo pacman -S --noconfirm --needed" # Installa pacchetti solo se necessari o da aggiornare
@@ -178,6 +178,7 @@ fi
 sudo git clone https://github.com/smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
 cd "$PROJECT_DIR"
 sudo rm -f "$PROJECT_DIR/setup.sh"
+sudo rm -f "$PROJECT_DIR/setup2.sh"
 
 echo "🔐 [10] Imposto permessi su cartella progetto..."
 # Imposta i permessi per l'utente corrente che eseguirà php artisan serve
@@ -283,3 +284,4 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
+
