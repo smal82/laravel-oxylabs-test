@@ -178,7 +178,9 @@ if [ -d "$PROJECT_DIR" ]; then
     sudo rm -rf "$PROJECT_DIR"
     echo "Cartella progetto eliminata."
 fi
-sudo git clone https://github.com/smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
+# sudo git clone https://github.com/smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
+sudo git clone git@github.com:smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
+
 cd "$PROJECT_DIR"
 sudo rm -f "$PROJECT_DIR/setup.sh"
 sudo rm -f "$PROJECT_DIR/setup2.sh"
@@ -287,5 +289,6 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
+
 
 
