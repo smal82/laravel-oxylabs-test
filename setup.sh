@@ -18,7 +18,7 @@ DISTRO=$(awk -F= '/^ID=/{print $2}' /etc/os-release | tr -d '"')
 PROJECT_DIR="/var/www/html/laravel-oxylabs-test"
 
 # Imposta i comandi e i gruppi in base alla distribuzione.
-if [[ "$DISTRO" =~ ^(ubuntu|debian|linuxmint)$ ]]; then
+if [[ "$DISTRO" =~ ^(ubuntu|debian|linuxmint|elementary)$ ]]; then
     PM="apt"
     UPDATE_CMD="sudo apt update && sudo apt upgrade -y"
     INSTALL_CMD="sudo apt install -y"
@@ -289,6 +289,7 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
+
 
 
 
