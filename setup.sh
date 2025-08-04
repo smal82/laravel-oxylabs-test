@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# Gestione del file di log: Elimina il log precedente all'avvio
+LOGFILE="setup.log"
+rm -f "$LOGFILE" || true # Elimina il file di log, ignorando errori se non esiste
+
 # Abilita la modalità "fail-fast": lo script si interrompe al primo comando fallito.
 set -e
-LOGFILE="setup.log"
 # Reindirizza stdout e stderr sia alla console che al file di log.
 exec > >(tee -a "$LOGFILE") 2>&1
 
@@ -284,4 +287,5 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
+
 
