@@ -11,32 +11,52 @@ exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "📋 Avvio script multipiattaforme - $(date)"
 
-# 🔍 Rileva la distribuzione e imposta il gestore di pacchetti.
-DISTRO=$(awk -F= '/^ID=/{print $2}' /etc/os-release | tr -d '"')
-
 # Definisci il percorso del progetto Laravel.
 PROJECT_DIR="/var/www/html/laravel-oxylabs-test"
 
-# Imposta i comandi e i gruppi in base alla distribuzione.
-if [[ "$DISTRO" =~ ^(ubuntu|debian|linuxmint|elementary)$ ]]; then
+echo  "ℹ️ Rileva il nome esatto della distribuzione."
+if [ -f "/etc/mx-version" ]; then
+    DISTRO="MX Linux"
+else
+    # Fallback per altre distribuzioni
+    DISTRO=$(awk -F= '/^ID=/{print $2}' /etc/os-release | tr -d '"')
+fi
+
+# 🔍 Rileva il gestore di pacchetti e imposta le variabili di conseguenza.
+# Questo metodo non si basa sul nome della distribuzione, ma sull'esistenza del comando.
+if command -v apt &> /dev/null; then
     PM="apt"
     UPDATE_CMD="sudo apt update && sudo apt upgrade -y"
     INSTALL_CMD="sudo apt install -y"
     WEBSERVER_GROUP="www-data"
-elif [[ "$DISTRO" =~ ^(fedora|centos|almalinux)$ ]]; then
+elif command -v dnf &> /dev/null; then
     PM="dnf"
     UPDATE_CMD="sudo dnf upgrade --refresh -y"
     INSTALL_CMD="sudo dnf install -y"
     WEBSERVER_GROUP="apache"
-elif [[ "$DISTRO" =~ ^(arch|manjaro)$ ]]; then
+elif command -v pacman &> /dev/null; then
     PM="pacman"
-    UPDATE_CMD="sudo pacman -Syu --noconfirm" # Sincronizza e aggiorna i pacchetti
-    INSTALL_CMD="sudo pacman -S --noconfirm --needed" # Installa pacchetti solo se necessari o da aggiornare
-    WEBSERVER_GROUP="http" # Gruppo tipico per web server su Arch (es. apache, nginx)
+    UPDATE_CMD="sudo pacman -Syu --noconfirm --disable-download-timeout"
+    INSTALL_CMD="sudo pacman -S --noconfirm --needed"
+    WEBSERVER_GROUP="http"
+elif command -v zypper &> /dev/null; then
+    PM="zypper"
+    UPDATE_CMD="sudo zypper refresh && sudo zypper update -y"
+    INSTALL_CMD="sudo zypper install -y"
+    WEBSERVER_GROUP="wwwrun"
+elif command -v pkg &> /dev/null; then
+    PM="pkg"
+    UPDATE_CMD="sudo pkg update -f && sudo pkg upgrade -y"
+    INSTALL_CMD="sudo pkg install -y"
+    WEBSERVER_GROUP="www"  # valore comune nei BSD, ma può variare
 else
-    echo "🚫 Distribuzione non supportata: $DISTRO"
+    # Se nessun gestore di pacchetti supportato è stato trovato, esci.
+    echo "🚫 Nessun gestore di pacchetti supportato (apt, dnf, pacman, zypper, pkg) è stato trovato."
     exit 1
 fi
+
+
+
 echo "✅ Distribuzione: $DISTRO | Package manager: $PM"
 
 echo "🔧 Imposto limite inotify..."
@@ -53,7 +73,11 @@ else
 fi
 
 echo "🧰 [1] Aggiornamento pacchetti di sistema..."
+if [[ "$DISTRO" == "neon" ]]; then
+sudo apt-get update && sudo pkcon update -y
+else
 eval "$UPDATE_CMD"
+fi
 
 # Sezione comune per l'installazione dei pacchetti e configurazione di Laravel
 echo "🐘 [2] Installazione PHP + estensioni..."
@@ -85,69 +109,206 @@ if [[ "$PM" == "pacman" ]]; then
     sudo sed -i 's/^[;]*extension=intl\(.so\)*$/extension=intl.so/' "$PHP_INI_PATH" || true
     # NUOVA LOGICA per iconv
     sudo sed -i 's/^[;]*extension=iconv\(.so\)*$/extension=iconv.so/' "$PHP_INI_PATH" || true
+  
     # Altre estensioni (gestite in modo più semplice, si assume siano nel formato corretto con .so)
     sudo sed -i 's/^;extension=mysqli.so/extension=mysqli.so/' "$PHP_INI_PATH" || true
     sudo sed -i 's/^;extension=xml.so/extension=xml.so/' "$PHP_INI_PATH" || true
     echo "Estensioni PHP essenziali (intl, iconv, mysqli, pdo_mysql, xml) abilitate (se presenti e commentate)."
+elif [[ "$PM" == "zypper" ]]; then
+    PHP_VERSION="8"
+    REQUIRED_PKGS=(
+        "php$PHP_VERSION"
+        "php$PHP_VERSION-cli"
+        "php$PHP_VERSION-mbstring"
+        "php$PHP_VERSION-bcmath"
+        "php$PHP_VERSION-curl"
+        "php$PHP_VERSION-zip"
+        "php$PHP_VERSION-mysql"
+        "php$PHP_VERSION-intl"
+        "php$PHP_VERSION-dom"
+        "php$PHP_VERSION-phar"
+        "unzip"
+        "curl"
+    )
 
-
+    for pkg in "${REQUIRED_PKGS[@]}"; do
+        if rpm -q "$pkg" &>/dev/null; then
+            echo "✅ $pkg già installato."
+        else
+            echo "📦 Installazione $pkg..."
+            sudo zypper install -y "$pkg" || {
+                echo "❌ Errore nell’installazione di $pkg — controlla i repository."
+                exit 1
+            }
+        fi
+    done
 else
     # Pacchetti PHP per Debian/Ubuntu e Fedora/Red Hat
     eval "$INSTALL_CMD php php-cli php-mbstring php-xml php-bcmath php-curl php-zip php-mysqlnd php-intl unzip curl php-dom"
 fi
 
 echo "📦 [3] Installazione Composer..."
-# Composer è disponibile direttamente nei repository per la maggior parte delle distribuzioni.
-# Tenta l'installazione via gestore pacchetti, altrimenti usa lo script curl.
-if [[ "$PM" == "pacman" ]]; then
-    eval "$INSTALL_CMD composer" || {
-        echo "Composer non trovato nei repository Arch, installazione tramite script..."
-        curl -sS https://getcomposer.org/installer | php
+
+if [[ "$PM" == "zypper" ]]; then
+    # OpenSUSE: Composer è nel pacchetto php-composer (a seconda della versione di PHP)
+    PHP_VERSION="8"  # o imposta dinamicamente se vuoi
+    eval "$INSTALL_CMD php$PHP_VERSION-composer" || {
+        echo "⚠️ Installazione tramite pacchetto fallita. Provo con lo script ufficiale..."
+        PHP_BIN=$(command -v php$PHP_VERSION)
+        if [[ -z "$PHP_BIN" ]]; then
+            echo "🚫 PHP non trovato. Impossibile installare Composer."
+            exit 1
+        fi
+        curl -sS https://getcomposer.org/installer | "$PHP_BIN"
         sudo mv composer.phar /usr/local/bin/composer
     }
-elif ! command -v composer &> /dev/null; then
-    echo "Composer non trovato. Installazione tramite script..."
-    curl -sS https://getcomposer.org/installer | php
-    sudo mv composer.phar /usr/local/bin/composer
+
+elif [[ "$PM" == "pacman" ]]; then
+    # Arch Linux: composer è nei repo ufficiali
+    eval "$INSTALL_CMD composer" || {
+        echo "⚠️ Composer non trovato nei repository Arch, installazione tramite script..."
+        PHP_BIN=$(command -v php)
+        if [[ -z "$PHP_BIN" ]]; then
+            echo "🚫 PHP non trovato. Impossibile installare Composer."
+            exit 1
+        fi
+        curl -sS https://getcomposer.org/installer | "$PHP_BIN"
+        sudo mv composer.phar /usr/local/bin/composer
+    }
+
 else
-    echo "Composer già installato."
+    # Altre distro (Debian, Fedora, BSD...) → fallback con script
+    if ! command -v composer &> /dev/null; then
+        echo "Composer non trovato. Installazione tramite script..."
+        PHP_BIN=$(command -v php || command -v php8 || command -v php82 || command -v php81)
+        if [[ -z "$PHP_BIN" ]]; then
+            echo "🚫 PHP non trovato. Impossibile installare Composer."
+            exit 1
+        fi
+        curl -sS https://getcomposer.org/installer | "$PHP_BIN"
+        sudo mv composer.phar /usr/local/bin/composer
+    else
+        echo "Composer già installato."
+    fi
 fi
+
 
 echo "🖥️ [4] Installazione Git..."
 eval "$INSTALL_CMD git"
 
 echo "🔧 [5] Installazione Node.js + NPM..."
-if [[ "$PM" == "apt" || "$PM" == "dnf" ]]; then
-    eval "$INSTALL_CMD nodejs npm"
-    if ! node -v | grep -q "v18"; then
-        echo "⚠️ Node.js non è v18 — installo la versione consigliata..."
-        if [[ "$PM" == "apt" ]]; then
-            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-            eval "$INSTALL_CMD nodejs"
-        elif [[ "$PM" == "dnf" ]]; then
-            curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
-            eval "$INSTALL_CMD nodejs"
+
+if [[ "$PM" == "apt" || "$PM" == "zypper" ]]; then
+    echo "📦 Installazione nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+    export NVM_DIR="$HOME/.nvm"
+    source "$NVM_DIR/nvm.sh"
+
+    echo "📥 Installazione Node.js v18..."
+    nvm install 18
+    nvm use 18
+
+elif [[ "$PM" == "dnf" ]]; then
+    echo "📦 Installazione tramite DNF..."
+
+    if command -v node &> /dev/null; then
+        CURRENT_NODE_VERSION=$(node -v)
+        echo "➡️ Versione rilevata: $CURRENT_NODE_VERSION"
+
+        if ! echo "$CURRENT_NODE_VERSION" | grep -q "v18"; then
+            echo "🧹 Rimozione Node.js incompatibile..."
+            sudo dnf remove -y nodejs nodejs-full-i18n || echo "⚠️ Errore durante la rimozione."
+        else
+            echo "✅ Node.js v18 già presente. Salto rimozione."
         fi
+    else
+        echo "🚫 Node.js non rilevato."
     fi
+
+    if ! command -v node &> /dev/null || ! node -v | grep -q "v18"; then
+        echo "🌐 Configuro repo Nodesource..."
+        curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+        sudo dnf install -y nodejs --allowerasing
+        echo "✅ Node.js v18 installato: $(node -v)"
+    fi
+
+    if ! command -v npm &> /dev/null; then
+        echo "📦 NPM non rilevato — installo manualmente..."
+        sudo dnf install -y npm || echo "❌ Impossibile installare NPM."
+    fi
+
 elif [[ "$PM" == "pacman" ]]; then
-    eval "$INSTALL_CMD nodejs npm"
+    echo "📦 Installazione tramite Pacman..."
+
+    if ! command -v node &> /dev/null || ! node -v | grep -q "v18"; then
+        echo "⚠️ Node.js v18 non trovato — installo..."
+        eval "$INSTALL_CMD nodejs npm"
+    else
+        echo "✅ Node.js v18 già presente. Salto installazione."
+    fi
+
+    if ! command -v npm &> /dev/null; then
+        echo "📦 NPM non rilevato — installo manualmente..."
+        eval "$INSTALL_CMD npm"
+    fi
+
+else
+    echo "⚠️ Gestore di pacchetti non riconosciuto: '$PM' — salto installazione."
 fi
+
+# Verifica finale
+echo "🔍 Verifica finale..."
+command -v node &> /dev/null && echo "✅ Node.js: $(node -v)" || echo "❌ Node.js non disponibile"
+command -v npm &> /dev/null && echo "✅ NPM: $(npm -v)" || echo "❌ NPM non disponibile"
 
 echo "🗄️ [6] Installazione MySQL Server..."
 if [[ "$PM" == "apt" ]]; then
     eval "$INSTALL_CMD mariadb-server"
-    sudo systemctl enable --now mysql
+    if [[ "$DISTRO" == "MX Linux" ]]; then
+        if ! sudo service mariadb status >/dev/null 2>&1; then
+            echo "Il servizio mariadb non è attivo. Avvio e abilitazione..."
+            sudo service mariadb start
+            sudo update-rc.d mysql enable
+        else
+            echo "Il servizio mariadb è già in esecuzione. Ignoro l'avvio."
+        fi
+    else
+        sudo systemctl enable --now mysql
+    fi
+
 elif [[ "$PM" == "dnf" ]]; then
-    eval "$INSTALL_CMD mariadb-server" # Su Fedora/Ultramarine è mariadb-server
+    eval "$INSTALL_CMD mariadb-server"
     sudo systemctl enable --now mariadb
+
 elif [[ "$PM" == "pacman" ]]; then
-    eval "$INSTALL_CMD mariadb" # Su Arch è mariadb
-    # Inizializza la directory dei dati di MariaDB prima di avviare il servizio
+    eval "$INSTALL_CMD mariadb"
     echo "Inizializzazione della directory dei dati di MariaDB..."
-    # Aggiunto '|| true' per ignorare l'errore se già inizializzato, rendendo lo script più robusto a esecuzioni multiple.
     sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql || true
     sudo systemctl enable --now mariadb
+
+elif [[ "$PM" == "zypper" ]]; then
+    eval "$INSTALL_CMD mariadb mariadb-tools"
+    echo "Inizializzazione della directory dei dati di MariaDB..."
+    sudo systemctl enable --now mariadb
+    sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql || true
 fi
+
+echo "🧹 Eseguo pulizia dei pacchetti di sistema..."
+if [[ "$PM" == "apt" || "$PM" == "dnf" || "$PM" == "zypper" ]]; then
+    sudo "$PM" autoremove -y || true
+elif [[ "$PM" == "pacman" ]]; then
+    set +e
+    ORPHANS=$(pacman -Qdtq)
+    if [ -n "$ORPHANS" ]; then
+        echo "Trovati pacchetti orfani da rimuovere: $ORPHANS"
+        sudo pacman -Rns $ORPHANS --noconfirm
+    else
+        echo "Nessun pacchetto orfano da rimuovere."
+    fi
+    set -e
+fi
+
 
 echo "🔑 [7] Configuro database con utente e database Laravel..."
 if [[ "$PM" == "pacman" ]]; then
@@ -178,8 +339,8 @@ if [ -d "$PROJECT_DIR" ]; then
     sudo rm -rf "$PROJECT_DIR"
     echo "Cartella progetto eliminata."
 fi
-# sudo git clone https://github.com/smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
-sudo git clone git@github.com:smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
+sudo git clone https://github.com/smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
+# sudo git clone git@github.com:smal82/laravel-oxylabs-test.git "$PROJECT_DIR"
 
 cd "$PROJECT_DIR"
 sudo rm -f "$PROJECT_DIR/setup.sh"
@@ -187,9 +348,51 @@ sudo rm -f "$PROJECT_DIR/setup2.sh"
 
 echo "🔐 [10] Imposto permessi su cartella progetto..."
 # Imposta i permessi per l'utente corrente che eseguirà php artisan serve
+if [[ "$PM" == "zypper" ]]; then
+# Definisce l'utente corrente
+CURRENT_USER=$(whoami)
+# Inizializza la variabile per il gruppo del server web
+WEBSERVER_GROUP_FOUND=""
+
+# Cerca il gruppo corretto del server web
+for group_name in wwwrun www-data apache; do
+    if getent group "$group_name" &> /dev/null; then
+        WEBSERVER_GROUP_FOUND="$group_name"
+        break
+    fi
+done
+
+if [ -n "$WEBSERVER_GROUP_FOUND" ]; then
+    echo "✅ Gruppo del server web '$WEBSERVER_GROUP_FOUND' trovato."
+    # Aggiungo l'utente corrente al gruppo del server web se non ne fa già parte
+    if ! groups "$CURRENT_USER" | grep -q "\b$WEBSERVER_GROUP_FOUND\b"; then
+        echo "➕ Aggiungo l'utente '$CURRENT_USER' al gruppo '$WEBSERVER_GROUP_FOUND'..."
+        sudo usermod -a -G "$WEBSERVER_GROUP_FOUND" "$CURRENT_USER"
+        echo "❗ Per rendere effettivo il cambiamento, esegui 'newgrp $WEBSERVER_GROUP_FOUND' o riavvia il terminale."
+    else
+        echo "✅ L'utente '$CURRENT_USER' è già membro del gruppo '$WEBSERVER_GROUP_FOUND'."
+    fi
+    # Imposto l'utente e il gruppo del server web come proprietari della directory
+    sudo chown -R "$CURRENT_USER":"$WEBSERVER_GROUP_FOUND" "$PROJECT_DIR"
+else
+    echo "⚠️ Avviso: Nessun gruppo comune del server web (wwwrun, www-data, apache) è stato trovato."
+    # Imposto il gruppo su "users" come fallback
+    FALLBACK_GROUP="users"
+    if getent group "$FALLBACK_GROUP" &> /dev/null; then
+        echo "✅ Gruppo di fallback '$FALLBACK_GROUP' trovato. Assegno la proprietà all'utente e a questo gruppo."
+        sudo chown -R "$CURRENT_USER":"$FALLBACK_GROUP" "$PROJECT_DIR"
+    else
+        echo "❌ Errore: Anche il gruppo di fallback 'users' non è stato trovato. Assegno la proprietà solo all'utente."
+        sudo chown -R "$CURRENT_USER" "$PROJECT_DIR"
+    fi
+fi
+
+sudo chmod -R 775 "$PROJECT_DIR" # Consenti a utente e gruppo di leggere, scrivere ed eseguire
+else
 CURRENT_USER=$(whoami)
 sudo chown -R "$CURRENT_USER":"$CURRENT_USER" "$PROJECT_DIR"
 sudo chmod -R 775 "$PROJECT_DIR" # Consenti a utente e gruppo (stesso utente) di scrivere
+fi
 
 echo "⚠️ Autorizzo directory per Git..."
 git config --global --add safe.directory "$PROJECT_DIR"
@@ -217,7 +420,7 @@ echo "✏️ Aggiorno configurazione MySQL in .env..."
 if [[ "$PM" == "pacman" ]]; then
     # Su Arch, usa mariadb come DB_CONNECTION
     sed -i '/DB_CONNECTION=/c\DB_CONNECTION=mariadb' .env
-    echo "Configurazione .env per MariaDB (Arch-based)."
+    echo "Configurazione .env per MariaDB."
 else
     # Per le altre distribuzioni, usa mysql
     sed -i '/DB_CONNECTION=/c\DB_CONNECTION=mysql' .env
@@ -255,6 +458,24 @@ composer dump-autoload
 php artisan optimize:clear
 
 echo "🧩 Installo DomCrawler Symfony..."
+if [[ "$PM" == "zypper" ]]; then
+    echo "🧩 Controllo e installazione php8-fileinfo..."
+    
+    if ! php -m | grep -iq fileinfo; then
+        sudo zypper install -y php8-fileinfo
+
+        # Verifica post-installazione
+        if php -m | grep -iq fileinfo; then
+            echo "✅ Estensione fileinfo abilitata."
+        else
+            echo "❌ Estensione fileinfo ancora non attiva dopo l'installazione. Controlla a mano."
+            exit 1
+        fi
+    else
+        echo "✅ fileinfo già attiva."
+    fi
+fi
+
 composer require symfony/dom-crawler --no-interaction
 
 echo "📦 Importo prodotti..."
@@ -265,17 +486,22 @@ if ! command -v crontab &> /dev/null; then
     echo "Installazione di cronie..."
     if [[ "$PM" == "pacman" ]]; then
         eval "$INSTALL_CMD cronie"
-        sudo systemctl enable --now cronie.service # Su Arch è cronie.service
+        sudo systemctl enable --now cronie.service
+    elif [[ "$PM" == "zypper" ]]; then
+        eval "$INSTALL_CMD cron"
+        sudo systemctl enable --now cron.service
     else
-        # Per Debian/Ubuntu e Fedora/Ultramarine
-        eval "$INSTALL_CMD cronie" # O nome equivalente del pacchetto cron
-        sudo systemctl enable --now cronie || sudo systemctl enable --now crond # Tenta cronie o crond
+        eval "$INSTALL_CMD cronie"
+        # Fedora / Debian / Ubuntu tipicamente hanno cronie.service o crond.service
+        sudo systemctl enable --now cronie.service || sudo systemctl enable --now crond.service
     fi
 else
     echo "Cronie (crontab) già installato."
 fi
+
 croncmd="* * * * * cd $PROJECT_DIR && php artisan schedule:run >> /dev/null 2>&1"
 ( crontab -l 2>/dev/null | grep -v -F "$croncmd" ; echo "$croncmd" ) | crontab -
+
 
 echo "🎨 Compilo frontend..."
 nohup npm run dev > storage/logs/dev.log 2>&1 &
@@ -289,7 +515,3 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
-
-
-
-
