@@ -40,6 +40,17 @@ I seguenti requisiti non devono obbligatorialmente essere presenti sul sistema, 
 | MySQL  | Qualsiasi compatibile |
 | Laravel CLI  | (opzionale)          |
 
+## 🐧 Distribuzioni Linux Compatibili 
+
+| Derivazione | OK ✅ | KO ❌ |
+|---|---|---|
+| **Debian/Ubuntu** | Debian, Ubuntu, Mint, mxlinux, elementary os, sparky | Pop, Zorin |
+| **Arch Linux** | Manjaro, Cachys, Bluestar | EndeavourOS, Kaos |
+| **Red Hat/Fedora** | Fedora, Oracle Linux, CentOS, Alma Linux, Rocky OS | |
+| **OpenSUSE** | OpenSUSE, KDE neon | |
+| **Altre** | | BlendOS |
+
+
 ### 📦 Setup automatizzato
 
 Se dovessero comparire messaggi tipo
