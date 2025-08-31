@@ -11,9 +11,6 @@ exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "📋 Avvio script multipiattaforme - $(date)"
 
-# Definisci il percorso del progetto Laravel.
-PROJECT_DIR="/var/www/html/laravel-oxylabs-test"
-
 echo  "ℹ️ Rileva il nome esatto della distribuzione."
 if [ -f "/etc/mx-version" ]; then
     DISTRO="MX Linux"
@@ -55,9 +52,56 @@ else
     exit 1
 fi
 
-
-
 echo "✅ Distribuzione: $DISTRO | Package manager: $PM"
+
+# 🚩 Controllo di compatibilità aggiuntivo.
+declare -a SUPPORTED_DISTROS=("debian" "ubuntu" "linuxmint" "MX Linux" "fedora" "manjaro" "cachys" "oraclelinux" "bluestar" "opensuse-tumbleweed" "opensuse-leap" "neon" "centos" "almalinux" "elementary" "rocky" "sparky")
+declare -a SUPPORTED_PMS=("apt" "dnf" "pacman" "zypper" "pkg")
+
+# Verifica se la distro è nella lista di quelle supportate (OK)
+IS_DISTRO_SUPPORTED=false
+
+# Gestione speciale per MX Linux, che ha un ID "mx" ma il nome è "MX Linux"
+if [ "$DISTRO" = "MX Linux" ]; then
+    IS_DISTRO_SUPPORTED=true
+else
+    # Loop per verificare le altre distro
+    for d in "${SUPPORTED_DISTROS[@]}"; do
+        if [[ "$DISTRO" == "$d" ]]; then
+            IS_DISTRO_SUPPORTED=true
+            break
+        fi
+    done
+fi
+
+# Verifica se il package manager è nella lista di quelli supportati
+IS_PM_SUPPORTED=false
+for p in "${SUPPORTED_PMS[@]}"; do
+    if [[ "$PM" == "$p" ]]; then
+        IS_PM_SUPPORTED=true
+        break
+    fi
+done
+
+# Logica condizionale per i casi di compatibilità
+if [[ "$IS_DISTRO_SUPPORTED" == "true" ]]; then
+    echo "🎉 La distribuzione '$DISTRO' è supportata. Procedo con l'installazione."
+elif [[ "$IS_PM_SUPPORTED" == "true" ]]; then
+    # La distro non è nella lista, ma il PM è supportato
+    echo "⚠️ La tua distribuzione '$DISTRO' non è ufficialmente elencata come supportata."
+    echo "Il gestore di pacchetti '$PM' è supportato, ma potrebbero verificarsi errori."
+    read -p "Vuoi procedere comunque? (s/n): " confirm
+    if [[ "$confirm" =~ ^[Ss]$ ]]; then
+        echo "✅ Procedo con l'installazione."
+    else
+        echo "❌ Installazione annullata dall'utente. Uscita."
+        exit 1
+    fi
+else
+    # Né la distro né il PM sono supportati
+    echo "🚫 Né la tua distribuzione '$DISTRO' né il gestore di pacchetti '$PM' sono supportati. Uscita."
+    exit 1
+fi
 
 echo "🔧 Imposto limite inotify..."
 REQUIRED_WATCHES=524288
@@ -72,11 +116,38 @@ else
     echo "Il valore attuale di fs.inotify.max_user_watches ($CURRENT_WATCHES) è già >= $REQUIRED_WATCHES. Nessuna modifica necessaria."
 fi
 
+# Definisci il percorso del progetto Laravel.
+PROJECT_DIR="/var/www/html/laravel-oxylabs-test"
+
+# Nome del file di blocco del database di Pacman
+LOCK_FILE="/var/lib/pacman/db.lck"
+
+# Funzione per controllare e rimuovere il file di blocco
+check_and_fix_lock() {
+    echo "Controllo la presenza del file di blocco del database di Pacman..."
+    if [ -f "$LOCK_FILE" ]; then
+        echo "File di blocco trovato. Tentativo di rimozione..."
+        sudo rm "$LOCK_FILE"
+        if [ $? -eq 0 ]; then
+            echo "File di blocco rimosso con successo."
+        else
+            echo "Errore: Impossibile rimuovere il file di blocco. Potrebbe essere necessario un intervento manuale."
+            exit 1
+        fi
+    else
+        echo "Nessun file di blocco trovato. Procedo..."
+    fi
+}
+
 echo "🧰 [1] Aggiornamento pacchetti di sistema..."
 if [[ "$DISTRO" == "neon" ]]; then
 sudo apt-get update && sudo pkcon update -y
 else
+if [[ "$PM" === "pacman" ]]; then
+check_and_fix_lock()
+else
 eval "$UPDATE_CMD"
+fi
 fi
 
 # Sezione comune per l'installazione dei pacchetti e configurazione di Laravel
