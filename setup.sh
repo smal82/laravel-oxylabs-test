@@ -472,6 +472,8 @@ git config --global --add safe.directory "$PROJECT_DIR"
 echo "📦 Installazione dipendenze Laravel..."
 # Aggiunto --ignore-platform-reqs per bypassare i controlli delle estensioni PHP di Composer
 # se le estensioni sono installate ma Composer non le rileva correttamente.
+npm config delete proxy
+npm config delete https-proxy
 composer install --no-interaction --ignore-platform-reqs
 npm install --yes
 
@@ -587,5 +589,6 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
+
 
 
