@@ -143,7 +143,7 @@ echo "🧰 [1] Aggiornamento pacchetti di sistema..."
 if [[ "$DISTRO" == "neon" ]]; then
 sudo apt-get update && sudo pkcon update -y
 else
-if [[ "$PM" === "pacman" ]]; then
+if [[ "$PM" == "pacman" ]]; then
 check_and_fix_lock()
 else
 eval "$UPDATE_CMD"
@@ -586,3 +586,4 @@ echo "✅ Setup completato su $DISTRO!"
 echo "🔒 Admin → http://127.0.0.1:8000/admin/login"
 echo "🛒 Frontend → http://127.0.0.1:8000/view/products"
 echo ""
+
