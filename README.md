@@ -44,7 +44,7 @@ I seguenti requisiti non devono obbligatorialmente essere presenti sul sistema, 
 
 | Derivazione | OK ✅ | KO ❌ |
 |---|---|---|
-| **Debian/Ubuntu** | Debian, Ubuntu, Mint, mxlinux, elementary os, sparky, KDE neon | Pop, Zorin |
+| **Debian/Ubuntu** | Debian, Ubuntu, Mint, mxlinux,sparky, KDE neon | Pop, elementary os, Zorin |
 | **Arch Linux** | Manjaro, Cachys, Bluestar | EndeavourOS, Kaos |
 | **Red Hat/Fedora** | Fedora, Oracle Linux, CentOS, Alma Linux, Rocky OS | |
 | **OpenSUSE** | OpenSUSE | |
